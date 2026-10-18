@@ -48,8 +48,9 @@
 .ds-card__footer { display: flex; gap: var(--space-2); justify-content: flex-end; }
 
 /* Alert */
-.ds-alert { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-md); border-left: 4px solid; font-size: var(--font-size-sm); }
+.ds-alert { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 1px solid; font-size: var(--font-size-sm); }
 .ds-alert__title { font-weight: var(--font-weight-semibold); }
+.ds-alert__body { color: var(--color-neutral-900); }
 .ds-alert--info { background: var(--color-info-50); color: var(--color-info-700); border-color: var(--color-info-700); }
 .ds-alert--success { background: var(--color-success-50); color: var(--color-success-700); border-color: var(--color-success-700); }
 .ds-alert--warning { background: var(--color-warning-50); color: var(--color-warning-800); border-color: var(--color-warning-800); }
