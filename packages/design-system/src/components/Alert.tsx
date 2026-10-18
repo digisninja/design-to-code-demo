@@ -13,7 +13,7 @@ export function Alert({ tone = "info", title, children }: AlertProps) {
   return (
     <div className={`ds-alert ds-alert--${tone}`} role={urgent ? "alert" : "status"}>
       {title && <span className="ds-alert__title">{title}</span>}
-      <span>{children}</span>
+      <span className="ds-alert__body">{children}</span>
     </div>
   );
 }
