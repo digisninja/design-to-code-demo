@@ -1,0 +1,25 @@
+{
+  "name": "design-to-code",
+  "private": true,
+  "description": "End-to-end demo: Figma design system -> rule-validating Figma plug-in -> Storybook -> custom MCP -> Claude / Cursor -> GitHub",
+  "workspaces": [
+    "packages/design-rules",
+    "packages/design-system",
+    "packages/figma-plugin",
+    "packages/mcp-server"
+  ],
+  "scripts": {
+    "build": "npm run build -w @dtc/design-system && npm run build -w @dtc/figma-plugin && npm run build -w @dtc/mcp-server",
+    "storybook": "npm run storybook -w @dtc/design-system",
+    "build-storybook": "npm run build-storybook -w @dtc/design-system",
+    "plugin:watch": "npm run watch -w @dtc/figma-plugin",
+    "mcp": "node packages/mcp-server/dist/index.js",
+    "test": "vitest run",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": { "node": ">=20" }
+}

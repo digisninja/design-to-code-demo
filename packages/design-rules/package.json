@@ -1,0 +1,14 @@
+{
+  "name": "@dtc/design-rules",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Single source of truth: design tokens, component specs and accessibility/security/design-system rules shared by the Figma plug-in, Storybook and the MCP server.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.json": "./src/tokens.json"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

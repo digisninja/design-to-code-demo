@@ -1,0 +1,21 @@
+# CLAUDE.md
+
+## Design-to-Code workflow
+
+This repo turns validated Figma designs into code. The `design-to-code` MCP server is the source of truth for components, tokens and rules.
+
+When asked to implement a design (e.g. "implement the latest Figma export"):
+
+1. Call `get_figma_export` (id `latest` unless told otherwise) and look at the screenshot + node tree.
+2. Call `list_components`, then `get_component_spec` for every component the design uses.
+3. Implement with `@dtc/design-system` components only (`Button`, `Input`, `Card`, `Alert`). Use `var(--color-*)`, `var(--space-*)` tokens for any layout CSS. Never hardcode hex colours or invent new components.
+4. Respect every rule returned by `get_design_rules` — especially:
+   - A11Y-004: icon-only `Button` needs `aria-label`.
+   - A11Y-005: every `Input` needs `label`.
+   - SEC-001/002: never copy secrets or real-looking PII from a design into code or fixtures; use example.com and placeholders.
+   - SEC-004: password fields use `type="password"`.
+5. Put new screens in `examples/` and add a story if it is a new reusable component.
+6. Run `npm test` and `npm run typecheck`. Fix failures before committing.
+7. Create a branch `feat/<screen-name>`, commit with a message referencing the Figma export id, push, and open a PR using the template.
+
+Commands: `npm run storybook`, `npm test`, `npm run typecheck`, `npm run build`.

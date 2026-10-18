@@ -1,0 +1,23 @@
+{
+  "name": "@dtc/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Custom MCP server: serves design-system specs, rules and tokens to Claude Code / Cursor, and receives validated design exports from the Design Guard Figma plug-in over a local HTTP bridge.",
+  "type": "module",
+  "bin": {
+    "dtc-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@dtc/design-rules": "*",
+    "@types/node": "^20.17.0",
+    "esbuild": "^0.25.0"
+  }
+}

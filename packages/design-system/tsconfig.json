@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "jsx": "react-jsx", "lib": ["ES2020", "DOM"] },
+  "include": ["src", ".storybook"]
+}

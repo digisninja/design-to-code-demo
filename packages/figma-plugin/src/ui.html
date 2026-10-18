@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root { --fg: var(--figma-color-text, #111827); --muted: var(--figma-color-text-secondary, #6B7280);
+          --bg: var(--figma-color-bg, #fff); --line: var(--figma-color-border, #E5E7EB);
+          --err: #B91C1C; --err-bg: #FEF2F2; --warn: #92400E; --warn-bg: #FFFBEB; --ok: #15803D; --ok-bg: #F0FDF4; --brand: #4F46E5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 12px/1.45 Inter, system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  header { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  header h1 { font-size: 13px; margin: 0; }
+  header .scope { color: var(--muted); margin-left: auto; font-size: 11px; }
+  .summary { display: flex; gap: 6px; padding: 10px 14px; }
+  .chip { padding: 3px 8px; border-radius: 999px; font-weight: 600; font-size: 11px; }
+  .chip.err { background: var(--err-bg); color: var(--err); } .chip.warn { background: var(--warn-bg); color: var(--warn); }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); }
+  main { padding: 0 14px 12px; overflow: auto; height: calc(100vh - 230px); }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 14px 0 6px; }
+  .issue { border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; cursor: pointer; }
+  .issue.error { border-left-color: var(--err); }
+  .issue:hover { border-color: var(--brand); }
+  .issue .top { display: flex; gap: 6px; align-items: baseline; }
+  .issue code { font-size: 10px; color: var(--muted); }
+  .issue .node { margin-left: auto; color: var(--muted); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .issue .fix { color: var(--muted); margin-top: 3px; }
+  footer { position: fixed; bottom: 0; left: 0; right: 0; border-top: 1px solid var(--line); background: var(--bg); padding: 10px 14px; display: grid; gap: 8px; }
+  .row { display: flex; gap: 6px; }
+  input { flex: 1; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--bg); color: var(--fg); }
+  button { padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-weight: 600; cursor: pointer; }
+  button.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .status { font-size: 11px; color: var(--muted); min-height: 16px; }
+  .empty { text-align: center; padding: 30px 0; color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ Design Guard</h1>
+  <span class="scope" id="scope">—</span>
+</header>
+<div class="summary" id="summary"></div>
+<main id="issues"></main>
+<footer>
+  <div class="row" id="labelRow" hidden>
+    <input id="label" placeholder="Accessible label (A11Y-004), e.g. Close dialog" />
+    <button id="saveLabel">Save</button>
+  </div>
+  <div class="row">
+    <input id="endpoint" value="http://localhost:4848" aria-label="MCP bridge URL" />
+    <button id="revalidate" title="Re-run checks">↻</button>
+  </div>
+  <button class="primary" id="push" disabled>Push to MCP</button>
+  <div class="status" id="status"></div>
+</footer>
+<script>
+  const CATS = { accessibility: "♿ Accessibility", security: "🔒 Security", "design-system": "🎨 Design system" };
+  const $ = (id) => document.getElementById(id);
+  const send = (msg) => parent.postMessage({ pluginMessage: msg }, "*");
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  try { const saved = localStorage.getItem("endpoint"); if (saved) $("endpoint").value = saved; } catch {}
+  $("endpoint").addEventListener("change", () => { try { localStorage.setItem("endpoint", $("endpoint").value); } catch {} });
+
+  function render({ result, scope, selectedLabel, canLabel }) {
+    const { errors, warnings, nodesChecked } = result.summary;
+    $("scope").textContent = `${scope} · ${nodesChecked} layers`;
+    $("summary").innerHTML = result.issues.length
+      ? `<span class="chip err">${errors} error${errors === 1 ? "" : "s"}</span><span class="chip warn">${warnings} warning${warnings === 1 ? "" : "s"}</span>`
+      : `<span class="chip ok">All rules pass</span>`;
+
+    const groups = {};
+    for (const i of result.issues) (groups[i.category] ||= []).push(i);
+    $("issues").innerHTML = result.issues.length
+      ? Object.keys(CATS).filter((c) => groups[c]).map((c) => `
+          <h2>${CATS[c]} (${groups[c].length})</h2>
+          ${groups[c].map((i) => `
+            <div class="issue ${i.severity}" data-id="${esc(i.nodeId)}" title="Select layer">
+              <div class="top"><code>${esc(i.ruleId)}</code><strong>${esc(i.message)}</strong></div>
+              <div class="top"><span class="fix">${esc(i.fix)}</span><span class="node">${esc(i.nodeName)}</span></div>
+            </div>`).join("")}`).join("")
+      : `<div class="empty">✅ Ready to hand off to code</div>`;
+
+    $("labelRow").hidden = !canLabel;
+    if (canLabel && document.activeElement !== $("label")) $("label").value = selectedLabel || "";
+
+    $("push").disabled = !result.passed;
+    $("push").textContent = result.passed ? "Push to MCP" : `Fix ${errors} error${errors === 1 ? "" : "s"} to push`;
+  }
+
+  $("issues").addEventListener("click", (e) => {
+    const el = e.target.closest(".issue");
+    if (el) send({ type: "select-node", id: el.dataset.id });
+  });
+  $("saveLabel").onclick = () => send({ type: "set-label", label: $("label").value });
+  $("revalidate").onclick = () => send({ type: "validate" });
+  $("push").onclick = () => { $("status").textContent = "Validating…"; send({ type: "export" }); };
+
+  async function push(payload) {
+    const url = $("endpoint").value.replace(/\/$/, "") + "/exports";
+    $("status").textContent = `Pushing to ${url}…`;
+    try {
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) {
+        $("status").textContent = `✅ Export ${body.id} sent. Ask Claude/Cursor: "Implement the latest Figma export".`;
+        send({ type: "notify", text: "Design pushed to MCP" });
+      } else {
+        $("status").textContent = `❌ ${res.status}: ${body.error || "rejected by server"}`;
+        send({ type: "notify", text: "MCP rejected the design", error: true });
+      }
+    } catch (err) {
+      $("status").textContent = "❌ Can't reach the MCP bridge. Is the MCP server running (npm run mcp)?";
+    }
+  }
+
+  onmessage = (e) => {
+    const msg = e.data.pluginMessage;
+    if (!msg) return;
+    if (msg.type === "result") render(msg);
+    if (msg.type === "export-payload") push(msg.payload);
+  };
+</script>
+</body>
+</html>

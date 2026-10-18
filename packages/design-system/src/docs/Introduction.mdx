@@ -1,0 +1,24 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Introduction" />
+
+# Design-to-Code Design System
+
+This Storybook is the **contract** between design and code. Everything here is
+generated from one package — `@dtc/design-rules` — which is also used by:
+
+| Consumer | How it uses the rules |
+| --- | --- |
+| **Figma plug-in** (`packages/figma-plugin`) | Validates frames/components on the canvas and blocks the hand-off when errors exist |
+| **Custom MCP server** (`packages/mcp-server`) | Serves component specs, tokens, rules and the latest Figma export to Claude Code & Cursor |
+| **CI** (`.github/workflows/ci.yml`) | Runs the same validator + unit tests + Storybook a11y build on every PR |
+
+## Flow
+
+1. Designer builds a screen in Figma with library components (Button, Input, Card, Alert).
+2. **Design Guard** plug-in checks accessibility, security and design-system rules.
+3. When clean, the plug-in pushes the design JSON to the local MCP server.
+4. In Claude Code or Cursor: *"Implement the latest Figma export"* — the AI calls the MCP tools, gets the specs + rules, and writes code using these components.
+5. The AI validates, commits and opens a PR to GitHub; CI re-checks and deploys this Storybook.
+
+See **Rules** for every rule and **Components** for each component's requirements.

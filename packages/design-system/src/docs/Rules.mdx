@@ -1,0 +1,14 @@
+import { Meta } from "@storybook/blocks";
+import { RulesTable } from "./RulesTable";
+
+<Meta title="Rules" />
+
+# Design rules
+
+These rules are enforced identically in the **Figma plug-in**, the **MCP server**
+(`validate_design` tool) and **CI**. Errors block the Figma → code hand-off;
+warnings are reported.
+
+<RulesTable category="accessibility" />
+<RulesTable category="security" />
+<RulesTable category="design-system" />

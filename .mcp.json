@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "design-to-code": {
+      "command": "node",
+      "args": ["packages/mcp-server/dist/index.js"],
+      "env": { "STORYBOOK_URL": "http://localhost:6006" }
+    }
+  }
+}

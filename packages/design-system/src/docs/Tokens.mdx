@@ -1,0 +1,27 @@
+import { Meta } from "@storybook/blocks";
+import { tokens } from "@dtc/design-rules";
+
+<Meta title="Tokens" />
+
+# Tokens
+
+Source: `packages/design-rules/src/tokens.json` → generates `tokens.css` and is used by the Figma plug-in's DS-001 check.
+
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 12 }}>
+  {Object.entries(tokens.color).map(([name, hex]) => (
+    <div key={name} style={{ border: "1px solid #D1D5DB", borderRadius: 8, overflow: "hidden" }}>
+      <div style={{ background: hex, height: 56 }} />
+      <div style={{ padding: 8, fontSize: 12 }}><code>--color-{name}</code><br />{hex}</div>
+    </div>
+  ))}
+</div>
+
+## Spacing (4px grid)
+
+{Object.entries(tokens.space).map(([k, v]) => (
+  <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 0" }}>
+    <code style={{ width: 90 }}>--space-{k}</code>
+    <div style={{ width: v, height: 12, background: "#4F46E5" }} />
+    <span style={{ fontSize: 12 }}>{v}px</span>
+  </div>
+))}
